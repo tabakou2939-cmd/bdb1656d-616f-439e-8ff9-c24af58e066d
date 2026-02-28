@@ -1,0 +1,12 @@
+# Personal Portfolio Site
+- [ ] Initialize Project Structure <!-- id: 0 -->
+- [ ] Create Content Structure (HTML) <!-- id: 1 -->
+    - [ ] Top Section (Introduction + Photo) <!-- id: 2 -->
+    - [ ] Gallery Section (Card Layout) <!-- id: 3 -->
+    - [ ] Contact Form <!-- id: 4 -->
+- [ ] Apply Styling (CSS) <!-- id: 5 -->
+    - [ ] Setup Color Palette (White/Blue) & Typography <!-- id: 6 -->
+    - [ ] Responsive Layout <!-- id: 7 -->
+    - [ ] Animations & Polish <!-- id: 8 -->
+- [ ] Add Interactivity (JS) <!-- id: 9 -->
+- [ ] Verify & Final Review <!-- id: 10 -->
