@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <meta name="description" content="Welcome to my personal portfolio.">
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:title" content="My Portfolio">
+    <meta property="og:description" content="Welcome to my personal portfolio.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630">
+    <meta property="og:url" content="https://yourportfolio.example.com">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="My Portfolio">
+    <meta name="twitter:description" content="Welcome to my personal portfolio.">
+    <meta name="twitter:image" content="https://via.placeholder.com/1200x630">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header id="hero" style="position: relative;">
+        <!-- Top right admin link -->
+        <a href="admin.html"
+            style="position: absolute; top: 1rem; right: 2rem; color: #fff; text-decoration: none; font-size: 0.9rem; opacity: 0.8;">Admin
+            Login</a>
+        <div class="container">
+            <h1 id="profile-name">こんにちは、[Your Name]です。</h1>
+            <p id="profile-intro" class="intro-text">
+                クリエイティブなウェブ体験を作り出すことに情熱を注いでいます。<br>
+                シンプルで使いやすいデザインを心がけています。
+            </p>
+        </div>
+    </header>
+
+    <main>
+        <section id="gallery">
+            <div class="container">
+                <h2>Gallery</h2>
+                <div class="gallery-grid" id="dynamic-gallery-grid">
+                    <!-- Project Cards will be loaded dynamically by main.js -->
+                </div>
+            </div>
+        </section>
+
+        <section id="memos" style="background-color: var(--bg-light); padding: 4rem 0;">
+            <div class="container">
+                <h2>Public Memos</h2>
+                <div id="memo-list" class="memo-grid" style="display: grid; gap: 1rem; margin-top: 2rem;">
+                    <p>Loading memos...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="container">
+                <h2>Contact</h2>
+                <form id="contact-form" action="#" method="post">
+                    <div class="form-group">
+                        <label for="name">お名前</label>
+                        <input type="text" id="name" name="name" required placeholder="山田 太郎">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">メールアドレス</label>
+                        <input type="email" id="email" name="email" required placeholder="email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">お問い合わせ内容</label>
+                        <textarea id="message" name="message" rows="5" required
+                            placeholder="ここにメッセージを入力してください"></textarea>
+                    </div>
+
+                    <button type="submit">送信する</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+    </footer>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

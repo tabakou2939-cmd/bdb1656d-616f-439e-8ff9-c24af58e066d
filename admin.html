@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .auth-panel {
+            text-align: center;
+            margin-top: 5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 2rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .dashboard-panel {
+            margin-top: 2rem;
+        }
+
+        .admin-section {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: #fff;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f4f4f4;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .admin-header h2 {
+            margin: 0;
+            color: white;
+        }
+
+        .admin-header a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <header id="admin-header">
+        <div class="container admin-header-content"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
+            <h2 style="margin: 0; color: white;">Admin Dashboard</h2>
+            <a href="index.html" style="color: white; text-decoration: underline;">サイトに戻る</a>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <!-- Login Panel -->
+        <div id="auth-panel" class="auth-panel">
+            <h2>管理者ログイン</h2>
+            <form id="login-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="password">パスワード</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" style="width: 100%;">ログイン</button>
+            </form>
+        </div>
+
+        <!-- Dashboard Panel -->
+        <div id="dashboard-panel" class="dashboard-panel hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2>ダッシュボード</h2>
+                <div>
+                    <button id="export-data-btn" style="background-color: #28a745; margin-right: 1rem;">⬇️ 公開用データをダウンロード
+                        (data.js)</button>
+                    <a href="index.html" target="_blank"
+                        style="margin-right: 1rem; color: var(--accent-color); text-decoration: none; font-weight: bold;">公開サイトを見る
+                        ↗</a>
+                    <button id="logout-btn" style="background-color: #6c757d;">ログアウト</button>
+                </div>
+            </div>
+
+            <!-- Site Settings -->
+            <div class="admin-section">
+                <h3>サイト設定 (Site Settings)</h3>
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="profile-name">プロフィール名 (Name)</label>
+                        <input type="text" id="profile-name" placeholder="[Your Name]" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-intro">自己紹介 (Introduction)</label>
+                        <textarea id="profile-intro" rows="3" placeholder="クリエイティブなウェブ体験を作り出すことに情熱を注いでいます..."
+                            required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-email">連絡先メールアドレス (Contact Email)</label>
+                        <input type="email" id="contact-email" placeholder="example@domain.com" required>
+                    </div>
+
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem;">
+                        <h4 style="margin: 0;">デザイン設定 (Design Settings)</h4>
+                        <button type="button" id="btn-cafe-theme"
+                            style="background-color: #d4a373; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">☕
+                            カフェテーマ</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bg-image">背景画像 (Background Image)</label>
+                        <input type="file" id="bg-image" accept="image/*">
+                        <small
+                            style="color:#666; display:block; margin-top:0.25rem;">画像を選択すると、以下の背景色よりも優先して全体に適用されます。削除するには「設定を保存」時に画像を空にしてください（※プレビュー機能は省略）。</small>
+                    </div>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="color-main-bg">背景色 (Background)</label>
+                            <input type="color" id="color-main-bg" value="#ffffff" style="height: 40px; padding: 0;">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="color-primary-text">テキスト色 (Text)</label>
+                            <input type="color" id="color-primary-text" value="#333333"
+                                style="height: 40px; padding: 0;">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="color-accent">アクセント色 (Accent)</label>
+                            <input type="color" id="color-accent" value="#0056b3" style="height: 40px; padding: 0;">
+                        </div>
+                    </div>
+
+                    <button type="submit" style="margin-top: 1rem;">設定を保存</button>
+                </form>
+            </div>
+
+            <!-- Gallery Management -->
+            <div class="admin-section">
+                <h3>ギャラリー管理 (Gallery Management)</h3>
+                <form id="gallery-form"
+                    style="margin-bottom: 2rem; padding: 1rem; background: #fff; border: 1px solid #ddd; border-radius: 4px;">
+                    <h4>画像の追加</h4>
+                    <div class="form-group">
+                        <label for="gallery-image">画像ファイル (Image File)</label>
+                        <input type="file" id="gallery-image" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gallery-title">タイトル (Title)</label>
+                        <input type="text" id="gallery-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gallery-desc">説明 (Description)</label>
+                        <textarea id="gallery-desc" rows="2" required></textarea>
+                    </div>
+                    <button type="submit">ギャラリーに追加</button>
+                </form>
+
+                <div style="overflow-x: auto;">
+                    <table id="gallery-table">
+                        <thead>
+                            <tr>
+                                <th>画像</th>
+                                <th>タイトル</th>
+                                <th>説明</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Gallery items will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="admin-section">
+                <h3>新規公開メモ投稿 (Public Memos)</h3>
+                <form id="memo-form">
+                    <div class="form-group">
+                        <label for="memo-title">タイトル</label>
+                        <input type="text" id="memo-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memo-content">内容</label>
+                        <textarea id="memo-content" rows="4" required></textarea>
+                    </div>
+                    <button type="submit">投稿する</button>
+                </form>
+            </div>
+
+            <div class="admin-section">
+                <h3>投稿済み公開メモ一覧</h3>
+                <div style="overflow-x: auto;">
+                    <table id="memos-table">
+                        <thead>
+                            <tr>
+                                <th>日時</th>
+                                <th>タイトル</th>
+                                <th>内容</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Memos will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h3>お問い合わせ一覧</h3>
+                <div style="overflow-x: auto;">
+                    <table id="inquiries-table">
+                        <thead>
+                            <tr>
+                                <th>日時</th>
+                                <th>名前</th>
+                                <th>Email</th>
+                                <th>メッセージ</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Inquiries will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>
