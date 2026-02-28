@@ -138,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settings.profileIcon) {
             const previewContainer = document.getElementById('icon-preview-container');
             const previewImg = document.getElementById('icon-preview');
-            previewImg.src = settings.profileIcon;
-            previewContainer.style.display = 'block';
+            if (previewImg) previewImg.src = settings.profileIcon;
+            if (previewContainer) previewContainer.style.display = 'block';
         }
 
         if (settings.contactEmail) document.getElementById('contact-email').value = settings.contactEmail;
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle Profile Image Upload
         const iconInput = document.getElementById('profile-icon');
-        if (iconInput.files && iconInput.files[0]) {
+        if (iconInput && iconInput.files && iconInput.files[0]) {
             try {
                 settings.profileIcon = await getBase64(iconInput.files[0], 200, 200);
             } catch (error) {
