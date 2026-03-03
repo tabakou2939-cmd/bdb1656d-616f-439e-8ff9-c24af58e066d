@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load Colors
         if (settings.colorMainBg) document.getElementById('color-main-bg').value = settings.colorMainBg;
         if (settings.colorPrimaryText) document.getElementById('color-primary-text').value = settings.colorPrimaryText;
+        if (settings.colorHeroText) document.getElementById('color-hero-text').value = settings.colorHeroText;
         if (settings.colorAccent) document.getElementById('color-accent').value = settings.colorAccent;
     }
 
@@ -159,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         settings.colorMainBg = document.getElementById('color-main-bg').value;
         settings.colorPrimaryText = document.getElementById('color-primary-text').value;
+        settings.colorHeroText = document.getElementById('color-hero-text').value;
         settings.colorAccent = document.getElementById('color-accent').value;
 
         // Handle Profile Image Upload
@@ -220,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCafeTheme.addEventListener('click', () => {
             document.getElementById('color-main-bg').value = '#fdfbf7';
             document.getElementById('color-primary-text').value = '#4a3b32';
+            document.getElementById('color-hero-text').value = '#4a3b32';
             document.getElementById('color-accent').value = '#c27a3c';
             alert('カフェテーマの色をセットしました。「設定を保存」を押して反映してください。');
         });

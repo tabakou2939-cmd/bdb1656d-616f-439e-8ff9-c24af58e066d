@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
             heroSection.style.color = settings.colorPrimaryText;
             // Also apply to child elements explicitly if needed, but inheriting should work
         }
+        if (settings.colorHeroText) {
+            // Override specifically for the hero text using setProperty to enforce it
+            const heroName = document.getElementById('profile-name');
+            const heroIntro = document.getElementById('profile-intro');
+            if (heroName) heroName.style.setProperty('color', settings.colorHeroText, 'important');
+            if (heroIntro) heroIntro.style.setProperty('color', settings.colorHeroText, 'important');
+        }
         // Accent color might still need to be global for buttons across the site, 
         // or we can scope it. Let's keep accent global so buttons still match the theme.
     }
