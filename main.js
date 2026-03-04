@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 0. Load Site Settings (Priority: Exported Data window.PORTFOLIO_DATA > LocalStorage)
-    const settings = window.PORTFOLIO_DATA?.site_settings || JSON.parse(localStorage.getItem('site_settings') || '{}');
+    // Check if this is the admin's device
+    const isAdminDevice = localStorage.getItem('is_admin_device') === 'true';
+
+    // 0. Load Site Settings
+    const localSettingsStr = localStorage.getItem('site_settings');
+    let settings = {};
+    if (isAdminDevice && localSettingsStr) {
+        settings = JSON.parse(localSettingsStr);
+    } else {
+        settings = window.PORTFOLIO_DATA?.site_settings || JSON.parse(localSettingsStr || '{}');
+    }
 
     // In order to only apply styles to the hero section, we find the hero element
     const heroSection = document.getElementById('hero');
@@ -53,10 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 1. Load Public Memos (Priority: Exported Data window.PORTFOLIO_DATA > LocalStorage)
+    // 1. Load Public Memos
     const memoList = document.getElementById('memo-list');
     if (memoList) {
-        const memos = window.PORTFOLIO_DATA?.memos || JSON.parse(localStorage.getItem('memos') || '[]');
+        const localMemosStr = localStorage.getItem('memos');
+        const memos = (isAdminDevice && localMemosStr)
+            ? JSON.parse(localMemosStr)
+            : (window.PORTFOLIO_DATA?.memos || JSON.parse(localMemosStr || '[]'));
 
         if (memos.length === 0) {
             memoList.innerHTML = '<p>まだメモはありません。</p>';
@@ -84,10 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2.5 Load Dynamic Gallery (Priority: Exported Data window.PORTFOLIO_DATA > LocalStorage)
+    // 2.5 Load Dynamic Gallery
     const galleryGrid = document.getElementById('dynamic-gallery-grid');
     if (galleryGrid) {
-        const gallery = window.PORTFOLIO_DATA?.gallery || JSON.parse(localStorage.getItem('gallery') || '[]');
+        const localGalleryStr = localStorage.getItem('gallery');
+        const gallery = (isAdminDevice && localGalleryStr)
+            ? JSON.parse(localGalleryStr)
+            : (window.PORTFOLIO_DATA?.gallery || JSON.parse(localGalleryStr || '[]'));
         galleryGrid.innerHTML = '';
 
         if (gallery.length === 0) {

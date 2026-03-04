@@ -23,9 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.backgroundColor = settings.colorMainBg;
     }
 
+    // 0. Initialize LocalStorage from PORTFOLIO_DATA if completely empty
+    if (window.PORTFOLIO_DATA) {
+        if (!localStorage.getItem('site_settings') && window.PORTFOLIO_DATA.site_settings) {
+            localStorage.setItem('site_settings', JSON.stringify(window.PORTFOLIO_DATA.site_settings));
+        }
+        if (!localStorage.getItem('gallery') && window.PORTFOLIO_DATA.gallery) {
+            localStorage.setItem('gallery', JSON.stringify(window.PORTFOLIO_DATA.gallery));
+        }
+        if (!localStorage.getItem('memos') && window.PORTFOLIO_DATA.memos) {
+            localStorage.setItem('memos', JSON.stringify(window.PORTFOLIO_DATA.memos));
+        }
+    }
+
     // 1. Authentication
     // Check if simple session exists
     if (sessionStorage.getItem('admin_logged_in') === 'true') {
+        localStorage.setItem('is_admin_device', 'true');
         showDashboard();
     } else {
         if (adminHeader) adminHeader.style.display = 'none';
@@ -36,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value;
         if (password === '12262939') {
             sessionStorage.setItem('admin_logged_in', 'true');
+            localStorage.setItem('is_admin_device', 'true');
             showDashboard();
             document.getElementById('password').value = '';
         } else {
@@ -85,6 +100,24 @@ document.addEventListener('DOMContentLoaded', () => {
             URL.revokeObjectURL(url);
 
             alert('data.js のダウンロードが完了しました。設定を反映するには、このファイルを public フォルダ（トップページと同じ階層）に配置してください。');
+        });
+    }
+
+    // 1.3 Restore Data from data.js
+    const restoreDataBtn = document.getElementById('restore-data-btn');
+    if (restoreDataBtn) {
+        restoreDataBtn.addEventListener('click', () => {
+            if (confirm('現在のローカルの編集を破棄して、data.js の状態に復元しますか？（※元に戻せません）')) {
+                if (window.PORTFOLIO_DATA) {
+                    if (window.PORTFOLIO_DATA.site_settings) localStorage.setItem('site_settings', JSON.stringify(window.PORTFOLIO_DATA.site_settings));
+                    if (window.PORTFOLIO_DATA.gallery) localStorage.setItem('gallery', JSON.stringify(window.PORTFOLIO_DATA.gallery));
+                    if (window.PORTFOLIO_DATA.memos) localStorage.setItem('memos', JSON.stringify(window.PORTFOLIO_DATA.memos));
+                    alert('復元が完了しました。ページを再読み込みします。');
+                    location.reload();
+                } else {
+                    alert('data.js が正しく読み込まれていないか、データが空です。');
+                }
+            }
         });
     }
 
