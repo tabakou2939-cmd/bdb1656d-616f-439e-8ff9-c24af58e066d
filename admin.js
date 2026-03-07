@@ -176,6 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (settings.contactEmail) document.getElementById('contact-email').value = settings.contactEmail;
+        if (settings.noteUserId) {
+            const noteUserIdInput = document.getElementById('note-userid');
+            if (noteUserIdInput) noteUserIdInput.value = settings.noteUserId;
+        }
 
         // Load Colors
         if (settings.colorMainBg) document.getElementById('color-main-bg').value = settings.colorMainBg;
@@ -190,6 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
         settings.profileName = document.getElementById('profile-name').value;
         settings.profileIntro = document.getElementById('profile-intro').value;
         settings.contactEmail = document.getElementById('contact-email').value;
+
+        const noteUserIdInput = document.getElementById('note-userid');
+        if (noteUserIdInput) settings.noteUserId = noteUserIdInput.value.trim();
 
         settings.colorMainBg = document.getElementById('color-main-bg').value;
         settings.colorPrimaryText = document.getElementById('color-primary-text').value;

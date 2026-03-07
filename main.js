@@ -126,6 +126,142 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 2.7 Load Note Posts via RSS
+    const noteList = document.getElementById('note-list');
+    const noteSection = document.getElementById('note-posts');
+    const noteUserId = settings.noteUserId || 'kosei_2939'; // Defaulting to kosei_2939 as per user request
+
+    if (noteList && noteUserId) {
+        // We use a free RSS to JSON API service (rss2json) to bypass CORS and parse XML
+        const noteRssUrl = `https://note.com/${noteUserId}/rss`;
+        const rss2jsonApi = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(noteRssUrl)}`;
+        const fallbackApi = `https://api.allorigins.win/get?url=${encodeURIComponent(noteRssUrl)}`;
+
+        fetch(rss2jsonApi)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok' && data.items && data.items.length > 0) {
+                    renderNotePosts(data.items, noteList);
+                } else {
+                    // Fallback to allorigins if rss2json fails
+                    fetchFallbackRSS(fallbackApi, noteList);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching Note RSS via rss2json:', error);
+                fetchFallbackRSS(fallbackApi, noteList);
+            });
+    } else if (noteSection) {
+        // Hide the section entirely if no ID is configured
+        noteSection.style.display = 'none';
+    }
+
+    // Helper to render Note posts
+    function renderNotePosts(items, container) {
+        container.innerHTML = '';
+        items.slice(0, 6).forEach(item => {
+            const article = document.createElement('a');
+            article.href = item.link;
+            article.target = '_blank';
+            article.rel = 'noopener noreferrer';
+            article.className = 'memo-card note-card';
+            article.style.textDecoration = 'none';
+            article.style.display = 'block';
+            article.style.border = '1px solid #ddd';
+            article.style.padding = '1.5rem';
+            article.style.borderRadius = '8px';
+            article.style.backgroundColor = '#fff';
+            article.style.color = 'inherit';
+            article.style.transition = 'transform 0.2s, box-shadow 0.2s';
+
+            // Extract first image from description or content if available, otherwise use a placeholder or thumbnail
+            let imageUrl = item.thumbnail || '';
+            if (!imageUrl && item.description) {
+                const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+                if (imgMatch) imageUrl = imgMatch[1];
+            }
+
+            const imgHtml = imageUrl ? `<div style="width: 100%; height: 150px; overflow: hidden; border-radius: 4px; margin-bottom: 1rem;"><img src="${imageUrl}" alt="thumbnail" style="width: 100%; height: 100%; object-fit: cover;"></div>` : '';
+
+            // Clean up description (remove HTML tags for snippet)
+            let snippet = '';
+            if (item.description) {
+                snippet = item.description.replace(/<[^>]+>/g, '').substring(0, 80) + '...';
+            } else if (item.content) {
+                snippet = item.content.replace(/<[^>]+>/g, '').substring(0, 80) + '...';
+            }
+
+            const pubDate = new Date(item.pubDate);
+            const dateString = isNaN(pubDate) ? item.pubDate : pubDate.toLocaleDateString('ja-JP');
+
+            article.innerHTML = `
+                ${imgHtml}
+                <h3 style="margin-top: 0; color: #333; font-size: 1.1rem; margin-bottom: 0.5rem; line-height: 1.4;">${escapeHtml(item.title)}</h3>
+                <p style="color: #666; line-height: 1.5; font-size: 0.9rem; margin-bottom: 1rem;">${escapeHtml(snippet)}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+                    <small style="color: #999;">${dateString}</small>
+                    <span style="color: #2cb696; font-size: 0.8rem; font-weight: bold;">Noteで読む ↗</span>
+                </div>
+            `;
+
+            // Add hover effect via JS since it's inline styled for now
+            article.addEventListener('mouseenter', () => {
+                article.style.transform = 'translateY(-3px)';
+                article.style.boxShadow = '0 6px 12px rgba(0,0,0,0.1)';
+            });
+            article.addEventListener('mouseleave', () => {
+                article.style.transform = 'translateY(0)';
+                article.style.boxShadow = 'none';
+            });
+
+            container.appendChild(article);
+        });
+    }
+
+    // Fallback using AllOrigins and native DOMParser
+    function fetchFallbackRSS(fallbackUrl, container) {
+        fetch(fallbackUrl)
+            .then(res => res.json())
+            .then(data => {
+                if (data.contents) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    const items = xmlDoc.querySelectorAll("item");
+
+                    if (items && items.length > 0) {
+                        const parsedItems = Array.from(items).map(item => {
+                            let description = '';
+                            const descNode = item.querySelector("description");
+                            const contentEncoded = item.getElementsByTagNameNS("*", "encoded");
+
+                            if (contentEncoded.length > 0) {
+                                description = contentEncoded[0].textContent;
+                            } else if (descNode) {
+                                description = descNode.textContent;
+                            }
+
+                            return {
+                                title: item.querySelector("title")?.textContent || '',
+                                link: item.querySelector("link")?.textContent || '',
+                                pubDate: item.querySelector("pubDate")?.textContent || '',
+                                description: description,
+                                thumbnail: item.getElementsByTagNameNS("*", "thumbnail")[0]?.textContent || ''
+                            };
+                        });
+                        renderNotePosts(parsedItems, container);
+                    } else {
+                        container.innerHTML = '<p>Noteの投稿が見つかりませんでした。</p>';
+                    }
+                } else {
+                    container.innerHTML = '<p>Noteの投稿を読み込めませんでした。</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Fallback RSS fetch failed:', err);
+                container.innerHTML = '<p>Noteの投稿を読み込めませんでした。（通信エラー）</p>';
+            });
+    }
+
     // 3. Handle Contact Form Submission
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
