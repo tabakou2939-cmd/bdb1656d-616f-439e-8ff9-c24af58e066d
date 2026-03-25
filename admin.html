@@ -123,10 +123,7 @@
                 <div>
                     <button id="export-data-btn" style="background-color: #28a745; margin-right: 1rem;">⬇️ 公開用データをダウンロード
                         (data.js)</button>
-                    <button id="restore-data-btn"
-                        style="background-color: #ffc107; margin-right: 1rem; color: #000; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">🔄
-                        data.jsから復元</button>
-                    <a href="index.html" target="_blank"
+                    <a href="/" target="_blank"
                         style="margin-right: 1rem; color: var(--accent-color); text-decoration: none; font-weight: bold;">公開サイトを見る
                         ↗</a>
                     <button id="logout-btn" style="background-color: #6c757d;">ログアウト</button>
@@ -135,11 +132,11 @@
 
             <div
                 style="background-color: #e8f5e9; border-left: 4px solid #28a745; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
-                <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #155724;">📱 スマホなど他の端末に変更を反映させるには？</h4>
+                <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #155724;">✅ 変更を世界に公開（GitHubへ反映）するには？</h4>
                 <p style="margin: 0; font-size: 0.9rem; color: #155724;">
                     管理画面での変更は、今お使いのパソコンのブラウザの中に一時保存（LocalStorage）されています。<br>
-                    <strong>他の端末から見えるようにするには：</strong>上の緑色のボタンから <code>data.js</code> をダウンロードし、プロジェクトフォルダにある元の
-                    <code>data.js</code> を上書き（サーバーがある場合は再アップロード）してください。
+                    <strong>世界中から見えるようにするには：</strong>上の緑色のボタンから <code>data.js</code> をダウンロードし、GitHub上にある既存の
+                    <code>data.js</code> に上書きアップロード（コミット）してください。
                 </p>
             </div>
 
@@ -160,6 +157,16 @@
                     <div class="form-group">
                         <label for="contact-email">連絡先メールアドレス (Contact Email)</label>
                         <input type="email" id="contact-email" placeholder="example@domain.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="x-url">X (Twitter) URL (オプション)</label>
+                        <input type="url" id="x-url" placeholder="https://x.com/your_username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ig-url">Instagram URL (オプション)</label>
+                        <input type="url" id="ig-url" placeholder="https://instagram.com/your_username">
                     </div>
 
                     <div class="form-group">

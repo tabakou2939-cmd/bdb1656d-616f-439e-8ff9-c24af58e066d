@@ -1,0 +1,22 @@
+{
+  "site_settings": {
+    "profileName": "Kosei",
+    "profileIntro": "考古学（新石器時代、弓矢、石器）、世界遺産学、AIの勉強しています。\n当サイトは勉強に関するメモを記録するために作りました。\nSora2のアカウントはこちら。@bete3\ntwitterのアカウントはこちら。@KOSEI_2939\nご質問などありましたらお気軽にご連絡ください。",
+    "contactEmail": "tabakou.2939@gmail.com",
+    "colorMainBg": "#f0c97a",
+    "colorPrimaryText": "#ffffff",
+    "colorAccent": "#c27a3c",
+    "bgImageBase64": "",
+    "noteUserId": "",
+    "colorHeroText": "#f0f5f9"
+  },
+  "gallery": [],
+  "memos": [
+    {
+      "id": 1772882122005,
+      "title": "Backend Test",
+      "content": "This memo should appear globally.",
+      "date": "2026-03-07T11:15:22.005Z"
+    }
+  ]
+}

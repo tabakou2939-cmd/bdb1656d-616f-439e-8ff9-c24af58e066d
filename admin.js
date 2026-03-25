@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryTableBody = document.querySelector('#gallery-table tbody');
     const memosTableBody = document.querySelector('#memos-table tbody');
     const adminHeader = document.getElementById('admin-header');
-    const exportDataBtn = document.getElementById('export-data-btn');
 
     // Apply Background Image to Admin Page (including Login Screen)
     const settings = JSON.parse(localStorage.getItem('site_settings') || '{}');
@@ -36,20 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 1. Authentication
-    // Check if simple session exists
-    if (sessionStorage.getItem('admin_logged_in') === 'true') {
-        localStorage.setItem('is_admin_device', 'true');
-        showDashboard();
-    } else {
-        if (adminHeader) adminHeader.style.display = 'none';
-    }
+    // 0. Initialize LocalStorage from PORTFOLIO_DATA if completely empty
+    // Start auth immediately
+    if (adminHeader) adminHeader.style.display = 'none';
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const password = document.getElementById('password').value;
         if (password === '12262939') {
-            sessionStorage.setItem('admin_logged_in', 'true');
             localStorage.setItem('is_admin_device', 'true');
             showDashboard();
             document.getElementById('password').value = '';
@@ -59,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     logoutBtn.addEventListener('click', () => {
-        sessionStorage.removeItem('admin_logged_in');
         authPanel.classList.remove('hidden');
         dashboardPanel.classList.add('hidden');
         if (adminHeader) adminHeader.style.display = 'none';
@@ -75,7 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadMemos();
     }
 
-    // 1.2 Export Data (Publish)
+    // 1.2 Export Data (Publish to GitHub)
+    const exportDataBtn = document.getElementById('export-data-btn');
     if (exportDataBtn) {
         exportDataBtn.addEventListener('click', () => {
             const settings = JSON.parse(localStorage.getItem('site_settings') || '{}');
@@ -99,25 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            alert('data.js のダウンロードが完了しました。設定を反映するには、このファイルを public フォルダ（トップページと同じ階層）に配置してください。');
-        });
-    }
-
-    // 1.3 Restore Data from data.js
-    const restoreDataBtn = document.getElementById('restore-data-btn');
-    if (restoreDataBtn) {
-        restoreDataBtn.addEventListener('click', () => {
-            if (confirm('現在のローカルの編集を破棄して、data.js の状態に復元しますか？（※元に戻せません）')) {
-                if (window.PORTFOLIO_DATA) {
-                    if (window.PORTFOLIO_DATA.site_settings) localStorage.setItem('site_settings', JSON.stringify(window.PORTFOLIO_DATA.site_settings));
-                    if (window.PORTFOLIO_DATA.gallery) localStorage.setItem('gallery', JSON.stringify(window.PORTFOLIO_DATA.gallery));
-                    if (window.PORTFOLIO_DATA.memos) localStorage.setItem('memos', JSON.stringify(window.PORTFOLIO_DATA.memos));
-                    alert('復元が完了しました。ページを再読み込みします。');
-                    location.reload();
-                } else {
-                    alert('data.js が正しく読み込まれていないか、データが空です。');
-                }
-            }
+            alert('data.js のダウンロードが完了しました。このファイルを GitHub にアップロード（コミット）して上書きしてください！');
         });
     }
 
@@ -176,6 +151,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (settings.contactEmail) document.getElementById('contact-email').value = settings.contactEmail;
+        
+        if (settings.xUrl) {
+            const xUrlInput = document.getElementById('x-url');
+            if (xUrlInput) xUrlInput.value = settings.xUrl;
+        }
+        if (settings.igUrl) {
+            const igUrlInput = document.getElementById('ig-url');
+            if (igUrlInput) igUrlInput.value = settings.igUrl;
+        }
+
         if (settings.noteUserId) {
             const noteUserIdInput = document.getElementById('note-userid');
             if (noteUserIdInput) noteUserIdInput.value = settings.noteUserId;
@@ -194,6 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
         settings.profileName = document.getElementById('profile-name').value;
         settings.profileIntro = document.getElementById('profile-intro').value;
         settings.contactEmail = document.getElementById('contact-email').value;
+
+        const xUrlInput = document.getElementById('x-url');
+        if (xUrlInput) settings.xUrl = xUrlInput.value.trim();
+
+        const igUrlInput = document.getElementById('ig-url');
+        if (igUrlInput) settings.igUrl = igUrlInput.value.trim();
 
         const noteUserIdInput = document.getElementById('note-userid');
         if (noteUserIdInput) settings.noteUserId = noteUserIdInput.value.trim();
@@ -225,14 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("背景画像の読み込みに失敗しました。");
                 return;
             }
-        } else if (bgInput.value === "") { // If empty, we don't automatically delete it here unless the user wants to. 
-            // Optional: Implement a "clear background" checkbox if needed.
-            // For now, selecting a file overwrites it.
         }
 
         try {
             localStorage.setItem('site_settings', JSON.stringify(settings));
-            alert('設定を保存しました。反映はサイトのトップページで行われます。');
+            alert('設定を保存しました。反映させるには、公開用データをダウンロードしてください。');
 
             // Immediately apply background to admin page
             if (settings.bgImageBase64) {
@@ -248,11 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadSettings(); // Reload to show new preview
         } catch (e) {
             console.error(e);
-            if (e.name === 'QuotaExceededError' || e.message?.includes('quota') || e.code === 22) {
-                alert('保存容量の上限に達しました。画像ファイルが大きすぎるか、データが多すぎます。');
-            } else {
-                alert('設定の保存中にエラーが発生しました。');
-            }
+            alert('設定の保存中にエラーが発生しました。');
         }
     });
 
@@ -300,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         memosTableBody.innerHTML = '';
 
         if (memos.length === 0) {
-            memosTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">投稿されたメタはありません。</td></tr>';
+            memosTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">投稿されたメモはありません。</td></tr>';
             return;
         }
 
@@ -336,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             memos.push(newMemo);
             localStorage.setItem('memos', JSON.stringify(memos));
 
-            alert('メモを投稿しました。');
+            alert('メモを投稿しました。公開用データをダウンロードして最新にしてください。');
             memoForm.reset();
             loadMemos();
         });
@@ -392,20 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
             gallery.push(newItem);
+            localStorage.setItem('gallery', JSON.stringify(gallery));
 
-            try {
-                localStorage.setItem('gallery', JSON.stringify(gallery));
-                alert('ギャラリーに画像を追加しました。');
-                galleryForm.reset();
-                loadGallery();
-            } catch (e) {
-                console.error(e);
-                if (e.name === 'QuotaExceededError' || e.message?.includes('quota') || e.code === 22) {
-                    alert('保存容量の上限に達しました。画像ファイルが大きすぎるかわ、これ以上追加できません。');
-                } else {
-                    alert('画像の追加中にエラーが発生しました。');
-                }
-            }
+            alert('ギャラリーに画像を追加しました。公開用データをダウンロードしてください。');
+            galleryForm.reset();
+            loadGallery();
         } catch (error) {
             console.error("Error reading file:", error);
             alert("画像の読み込みに失敗しました。");

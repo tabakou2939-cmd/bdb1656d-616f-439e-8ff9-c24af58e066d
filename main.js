@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     // Check if this is the admin's device
     const isAdminDevice = localStorage.getItem('is_admin_device') === 'true';
 
@@ -62,6 +63,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 0.5 Load Social Links
+    const socialLinksContainer = document.getElementById('social-links');
+    if (socialLinksContainer) {
+        socialLinksContainer.innerHTML = '';
+        if (settings.xUrl) {
+            const xLink = document.createElement('a');
+            xLink.href = settings.xUrl;
+            xLink.target = '_blank';
+            xLink.rel = 'noopener noreferrer';
+            xLink.style.color = '#fff';
+            xLink.style.textDecoration = 'none';
+            xLink.innerHTML = `<svg width="24" height="24" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/></svg>`;
+            socialLinksContainer.appendChild(xLink);
+        }
+        if (settings.igUrl) {
+            const igLink = document.createElement('a');
+            igLink.href = settings.igUrl;
+            igLink.target = '_blank';
+            igLink.rel = 'noopener noreferrer';
+            igLink.style.color = '#fff';
+            igLink.style.textDecoration = 'none';
+            igLink.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
+            socialLinksContainer.appendChild(igLink);
+        }
+    }
+
     // 1. Load Public Memos
     const memoList = document.getElementById('memo-list');
     if (memoList) {
@@ -102,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const localGalleryStr = localStorage.getItem('gallery');
         const gallery = (isAdminDevice && localGalleryStr)
             ? JSON.parse(localGalleryStr)
-            : (window.PORTFOLIO_DATA?.gallery || JSON.parse(localGalleryStr || '[]'));
+            : (serverData.gallery || JSON.parse(localGalleryStr || '[]'));
         galleryGrid.innerHTML = '';
 
         if (gallery.length === 0) {
@@ -159,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper to render Note posts
     function renderNotePosts(items, container) {
         container.innerHTML = '';
-        items.slice(0, 6).forEach(item => {
+        items.slice(0, 12).forEach(item => {
             const article = document.createElement('a');
             article.href = item.link;
             article.target = '_blank';

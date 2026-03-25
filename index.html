@@ -77,8 +77,10 @@
                     </svg>
                     Note Posts
                 </h2>
-                <div id="note-list" class="memo-grid" style="display: grid; gap: 1rem; margin-top: 2rem;">
-                    <p>Loading Note posts...</p>
+                <div class="note-scroll-container">
+                    <div id="note-list" class="memo-grid" style="display: grid; gap: 1rem;">
+                        <p>Loading Note posts...</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -110,6 +112,7 @@
     </main>
 
     <footer>
+        <div id="social-links" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem;"></div>
         <p>&copy; 2024 My Portfolio. All rights reserved.</p>
     </footer>
     <script src="data.js"></script>

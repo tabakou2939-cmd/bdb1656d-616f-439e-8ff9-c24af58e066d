@@ -246,3 +246,29 @@ footer {
     color: #fff;
     border-top: var(--border-subtle);
 }
+
+/* Note Scroll Container */
+.note-scroll-container {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 15px;
+    margin-top: 2rem;
+}
+
+.note-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.note-scroll-container::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+.note-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2); 
+    border-radius: 4px;
+}
+
+.note-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4); 
+}
