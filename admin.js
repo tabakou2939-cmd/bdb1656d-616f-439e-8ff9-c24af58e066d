@@ -160,6 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const igUrlInput = document.getElementById('ig-url');
             if (igUrlInput) igUrlInput.value = settings.igUrl;
         }
+        if (settings.igEmbedHtml) {
+            const igEmbedInput = document.getElementById('ig-embed-html');
+            if (igEmbedInput) igEmbedInput.value = settings.igEmbedHtml;
+        }
 
         if (settings.noteUserId) {
             const noteUserIdInput = document.getElementById('note-userid');
@@ -185,6 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const igUrlInput = document.getElementById('ig-url');
         if (igUrlInput) settings.igUrl = igUrlInput.value.trim();
+
+        const igEmbedInput = document.getElementById('ig-embed-html');
+        if (igEmbedInput) settings.igEmbedHtml = igEmbedInput.value.trim();
 
         const noteUserIdInput = document.getElementById('note-userid');
         if (noteUserIdInput) settings.noteUserId = noteUserIdInput.value.trim();

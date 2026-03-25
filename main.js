@@ -89,6 +89,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 0.6 Load Social Feeds
+    const xFeedContainer = document.getElementById('x-feed-container');
+    const igFeedContainer = document.getElementById('ig-feed-container');
+
+    if (xFeedContainer && settings.xUrl) {
+        xFeedContainer.innerHTML = `
+            <h3 style="margin-top:0; font-size:1.2rem; color:var(--accent-color); text-align:center; padding-bottom: 1rem; border-bottom: 1px solid #eee;">X (Twitter)</h3>
+            <div style="margin-top: 1rem;">
+                <a class="twitter-timeline" data-height="500" href="${escapeHtml(settings.xUrl)}">Tweets by X</a>
+            </div>
+        `;
+        // Load Twitter widget script once
+        if (!document.getElementById('twitter-wjs')) {
+            const script = document.createElement('script');
+            script.id = 'twitter-wjs';
+            script.src = 'https://platform.twitter.com/widgets.js';
+            script.async = true;
+            script.charset = 'utf-8';
+            document.body.appendChild(script);
+        }
+    } else if (xFeedContainer) {
+        xFeedContainer.style.display = 'none'; // hide if not configured
+    }
+
+    if (igFeedContainer && settings.igEmbedHtml) {
+        igFeedContainer.innerHTML = `
+            <h3 style="margin-top:0; font-size:1.2rem; color:var(--accent-color); text-align:center; padding-bottom: 1rem; border-bottom: 1px solid #eee;">Instagram</h3>
+            <div style="max-height: 500px; overflow-y: auto; overflow-x: hidden; margin-top: 1rem; width: 100%; display: flex; justify-content: center;">
+                ${settings.igEmbedHtml}
+            </div>
+        `;
+        // Re-execute scripts inside embedHtml if any (like Instagram's embed.js)
+        const scripts = igFeedContainer.getElementsByTagName('script');
+        for (let i = 0; i < scripts.length; i++) {
+            const newScript = document.createElement('script');
+            if (scripts[i].src) newScript.src = scripts[i].src;
+            if (scripts[i].text) newScript.text = scripts[i].text;
+            newScript.async = true;
+            document.body.appendChild(newScript);
+        }
+    } else if (igFeedContainer) {
+        igFeedContainer.style.display = 'none'; // hide if not configured
+    }
+
+    // Hide the whole section if both are empty
+    const socialFeedsSection = document.getElementById('social-feeds');
+    if (socialFeedsSection && !settings.xUrl && !settings.igEmbedHtml) {
+        socialFeedsSection.style.display = 'none';
+    }
+
     // 1. Load Public Memos
     const memoList = document.getElementById('memo-list');
     if (memoList) {
