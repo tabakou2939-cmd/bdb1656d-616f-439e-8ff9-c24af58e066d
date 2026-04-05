@@ -42,9 +42,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (settings.profileName) {
         document.getElementById('profile-name').textContent = `こんにちは、${settings.profileName}です。`;
+        document.title = `${settings.profileName} - Portfolio`;
+        
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.content = document.title;
+        
+        const twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twTitle) twTitle.content = document.title;
     }
     if (settings.profileIntro) {
         document.getElementById('profile-intro').textContent = settings.profileIntro;
+        
+        const cleanIntro = settings.profileIntro.replace(/\n/g, ' ').substring(0, 120);
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.content = cleanIntro;
+        
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.content = cleanIntro;
+        
+        const twDesc = document.querySelector('meta[name="twitter:description"]');
+        if (twDesc) twDesc.content = cleanIntro;
     }
 
     // Apply Background Image specifically to the hero section
