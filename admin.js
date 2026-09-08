@@ -164,6 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const igEmbedInput = document.getElementById('ig-embed-html');
             if (igEmbedInput) igEmbedInput.value = settings.igEmbedHtml;
         }
+        if (settings.linkedinUrl) {
+            const linkedinUrlInput = document.getElementById('linkedin-url');
+            if (linkedinUrlInput) linkedinUrlInput.value = settings.linkedinUrl;
+        }
 
         if (settings.noteUserId) {
             const noteUserIdInput = document.getElementById('note-userid');
@@ -192,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const igEmbedInput = document.getElementById('ig-embed-html');
         if (igEmbedInput) settings.igEmbedHtml = igEmbedInput.value.trim();
+
+        const linkedinUrlInput = document.getElementById('linkedin-url');
+        if (linkedinUrlInput) settings.linkedinUrl = linkedinUrlInput.value.trim();
 
         const noteUserIdInput = document.getElementById('note-userid');
         if (noteUserIdInput) settings.noteUserId = noteUserIdInput.value.trim();
