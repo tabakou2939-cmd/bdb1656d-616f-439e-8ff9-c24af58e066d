@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin.html
+
+Sitemap: https://bdb1656d-616f-439e-8ff9-c24af58e066-seven.vercel.app/sitemap.xml
