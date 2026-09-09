@@ -1,7 +1,7 @@
 window.PORTFOLIO_DATA = {
   "site_settings": {
-    "profileName": "Kosei",
-    "profileIntro": "紛争や戦争などの人類史の悲劇（負の遺産、記憶の場、ダークツーリズム）世界遺産学、AIの勉強しています。\n当サイトは勉強に関するメモを記録するために作りました。\ntwitterのアカウントはこちら。@KOSEI_2939\nご質問などありましたらお気軽にご連絡ください。",
+    "profileName": "田端宏成（Kosei）",
+    "profileIntro": "田端宏成（Kosei）です。\n紛争や戦争などの人類史の悲劇（負の遺産、記憶の場、ダークツーリズム）、世界遺産学、AIについて学んでいます。\n当サイトは学びの記録を残すために作りました。\ntwitterのアカウントはこちら。@KOSEI_2939\nご質問などありましたらお気軽にご連絡ください。",
     "contactEmail": "tabakou.2939@gmail.com",
     "colorMainBg": "#f0c97a",
     "colorPrimaryText": "#ffffff",
