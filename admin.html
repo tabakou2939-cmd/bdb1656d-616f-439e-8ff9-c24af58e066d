@@ -142,6 +142,28 @@
 </head>
 
 <body>
+    <!-- Hamburger menu: quick access to each manageable page/section of the dashboard -->
+    <button id="nav-toggle" class="nav-toggle hidden" aria-label="メニューを開く" aria-expanded="false"
+        aria-controls="site-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <nav id="site-nav" class="site-nav" aria-hidden="true">
+        <button id="nav-close" class="nav-close" aria-label="メニューを閉じる">&times;</button>
+        <ul>
+            <li><a href="#section-settings" class="nav-link">サイト設定</a></li>
+            <li><a href="#section-gallery" class="nav-link">ギャラリー管理</a></li>
+            <li><a href="#section-memo-post" class="nav-link">メモ投稿</a></li>
+            <li><a href="#section-memo-list" class="nav-link">投稿済みメモ</a></li>
+            <li><a href="#section-inquiries" class="nav-link">お問い合わせ一覧</a></li>
+        </ul>
+        <div class="nav-admin">
+            <a href="index.html" class="nav-admin-link">🌐 公開サイトを見る</a>
+        </div>
+    </nav>
+    <div id="nav-overlay" class="nav-overlay"></div>
+
     <header id="admin-header">
         <div class="container admin-header-content"
             style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
@@ -186,7 +208,7 @@
             </div>
 
             <!-- Site Settings -->
-            <div class="admin-section">
+            <div class="admin-section" id="section-settings">
                 <h3>サイト設定 (Site Settings)</h3>
                 <form id="settings-form">
                     <div class="form-group">
@@ -272,7 +294,7 @@
             </div>
 
             <!-- Gallery Management -->
-            <div class="admin-section">
+            <div class="admin-section" id="section-gallery">
                 <h3>ギャラリー管理 (Gallery Management)</h3>
                 <form id="gallery-form"
                     style="margin-bottom: 2rem; padding: 1rem; background: #fff; border: 1px solid #ddd; border-radius: 4px;">
@@ -308,7 +330,7 @@
                     </table>
                 </div>
             </div>
-            <div class="admin-section">
+            <div class="admin-section" id="section-memo-post">
                 <h3>新規公開メモ投稿 (Public Memos)</h3>
                 <form id="memo-form">
                     <div class="form-group">
@@ -323,7 +345,7 @@
                 </form>
             </div>
 
-            <div class="admin-section">
+            <div class="admin-section" id="section-memo-list">
                 <h3>投稿済み公開メモ一覧</h3>
                 <div style="overflow-x: auto;">
                     <table id="memos-table">
@@ -342,7 +364,7 @@
                 </div>
             </div>
 
-            <div class="admin-section">
+            <div class="admin-section" id="section-inquiries">
                 <h3>お問い合わせ一覧</h3>
                 <div style="overflow-x: auto;">
                     <table id="inquiries-table">
@@ -367,6 +389,7 @@
 
     <script src="data.js"></script>
     <script src="admin.js"></script>
+    <script src="nav.js"></script>
 </body>
 
 </html>
