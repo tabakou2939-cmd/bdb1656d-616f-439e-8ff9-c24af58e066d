@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryTableBody = document.querySelector('#gallery-table tbody');
     const memosTableBody = document.querySelector('#memos-table tbody');
     const adminHeader = document.getElementById('admin-header');
+    const navToggle = document.getElementById('nav-toggle');
+    const siteNav = document.getElementById('site-nav');
+    const navOverlay = document.getElementById('nav-overlay');
 
     // Apply Background Image to Admin Page (including Login Screen)
     const settings = JSON.parse(localStorage.getItem('site_settings') || '{}');
@@ -55,12 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
         authPanel.classList.remove('hidden');
         dashboardPanel.classList.add('hidden');
         if (adminHeader) adminHeader.style.display = 'none';
+        if (navToggle) {
+            navToggle.classList.add('hidden');
+            navToggle.classList.remove('open');
+        }
+        if (siteNav) siteNav.classList.remove('open');
+        if (navOverlay) navOverlay.classList.remove('open');
     });
 
     function showDashboard() {
         authPanel.classList.add('hidden');
         dashboardPanel.classList.remove('hidden');
         if (adminHeader) adminHeader.style.display = 'block';
+        if (navToggle) navToggle.classList.remove('hidden');
         loadSettings();
         loadInquiries();
         loadGallery();

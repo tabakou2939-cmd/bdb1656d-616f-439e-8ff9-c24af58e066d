@@ -35,8 +35,29 @@
 </head>
 
 <body>
+    <!-- Hamburger menu: lets visitors jump between page sections and (via 管理者画面) reach the admin dashboard -->
+    <button id="nav-toggle" class="nav-toggle" aria-label="メニューを開く" aria-expanded="false" aria-controls="site-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <nav id="site-nav" class="site-nav" aria-hidden="true">
+        <button id="nav-close" class="nav-close" aria-label="メニューを閉じる">&times;</button>
+        <ul>
+            <li><a href="#hero" class="nav-link">ホーム</a></li>
+            <li><a href="#note-posts" class="nav-link">Note</a></li>
+            <li><a href="#social-feeds" class="nav-link">SNS</a></li>
+            <li><a href="#gallery" class="nav-link">ギャラリー</a></li>
+            <li><a href="#memos" class="nav-link">メモ</a></li>
+            <li><a href="#contact" class="nav-link">お問い合わせ</a></li>
+        </ul>
+        <div class="nav-admin">
+            <a href="admin.html" class="nav-admin-link">🔒 管理者画面</a>
+        </div>
+    </nav>
+    <div id="nav-overlay" class="nav-overlay"></div>
+
     <header id="hero" style="position: relative;">
-        <!-- 管理画面へは /admin から直接アクセスする（公開ページにリンクは置かない） -->
         <div class="container">
             <h1 id="profile-name">こんにちは、[Your Name]です。</h1>
             <p id="profile-intro" class="intro-text">
@@ -123,6 +144,7 @@
     </footer>
     <script src="data.js"></script>
     <script src="main.js"></script>
+    <script src="nav.js"></script>
 </body>
 
 </html>
