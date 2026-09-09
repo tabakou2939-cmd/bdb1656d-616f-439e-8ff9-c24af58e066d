@@ -12,15 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
         settings = window.PORTFOLIO_DATA?.site_settings || JSON.parse(localSettingsStr || '{}');
     }
 
+    // Whether a background photo is configured — when it is, the photo is shown
+    // fixed behind the entire site (not just the hero), so it takes priority
+    // over the flat hero background/text colors below.
+    const hasPhoto = !!settings.bgImageBase64;
+
     // In order to only apply styles to the hero section, we find the hero element
     const heroSection = document.getElementById('hero');
 
     if (heroSection) {
         // Apply CSS Variables for Design Customization only to the hero section
-        if (settings.colorMainBg) {
+        if (!hasPhoto && settings.colorMainBg) {
             heroSection.style.backgroundColor = settings.colorMainBg;
         }
-        if (settings.colorPrimaryText) {
+        if (!hasPhoto && settings.colorPrimaryText) {
             heroSection.style.color = settings.colorPrimaryText;
             // Also apply to child elements explicitly if needed, but inheriting should work
         }
@@ -64,18 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (twDesc) twDesc.content = cleanIntro;
     }
 
-    // Apply Background Image specifically to the hero section
-    if (heroSection) {
-        if (settings.bgImageBase64) {
-            heroSection.style.backgroundImage = `url(${settings.bgImageBase64})`;
-            heroSection.style.backgroundSize = 'cover';
-            heroSection.style.backgroundPosition = 'center';
-            heroSection.style.backgroundAttachment = 'scroll'; // Prevent weird fixed scrolling on smaller elements
-            heroSection.classList.add('has-photo'); // switches to the dark warm overlay treatment (see style.css)
-        } else {
-            heroSection.style.backgroundImage = 'none';
-            heroSection.classList.remove('has-photo');
-        }
+    // Apply Background Image site-wide — a fixed backdrop behind every section,
+    // not just the hero (see body.has-photo in style.css for the overlay/contrast treatment)
+    if (hasPhoto) {
+        document.body.style.setProperty('--bg-photo-image', `url(${settings.bgImageBase64})`);
+        document.body.classList.add('has-photo');
+    } else {
+        document.body.style.removeProperty('--bg-photo-image');
+        document.body.classList.remove('has-photo');
     }
 
     // 0.5 Load Social Links (icon-only, opens profile directly)
