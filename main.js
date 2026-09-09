@@ -71,89 +71,79 @@ document.addEventListener('DOMContentLoaded', () => {
             heroSection.style.backgroundSize = 'cover';
             heroSection.style.backgroundPosition = 'center';
             heroSection.style.backgroundAttachment = 'scroll'; // Prevent weird fixed scrolling on smaller elements
-
-            // Add a subtle overlay so text remains readable if they set a bright image before tweaking text color
-            heroSection.style.position = 'relative';
-            heroSection.style.zIndex = '1';
+            heroSection.classList.add('has-photo'); // switches to the dark warm overlay treatment (see style.css)
         } else {
             heroSection.style.backgroundImage = 'none';
+            heroSection.classList.remove('has-photo');
         }
     }
 
-    // 0.5 Load Social Links
+    // 0.5 Load Social Links (icon-only, opens profile directly)
     const socialLinksContainer = document.getElementById('social-links');
     if (socialLinksContainer) {
         socialLinksContainer.innerHTML = '';
         if (settings.xUrl) {
-            const xLink = document.createElement('a');
-            xLink.href = settings.xUrl;
-            xLink.target = '_blank';
-            xLink.rel = 'noopener noreferrer';
-            xLink.style.color = '#fff';
-            xLink.style.textDecoration = 'none';
-            xLink.innerHTML = `<svg width="24" height="24" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/></svg>`;
-            socialLinksContainer.appendChild(xLink);
+            socialLinksContainer.appendChild(
+                buildSocialIconLink(settings.xUrl, SOCIAL_ICONS.x)
+            );
         }
         if (settings.igUrl) {
-            const igLink = document.createElement('a');
-            igLink.href = settings.igUrl;
-            igLink.target = '_blank';
-            igLink.rel = 'noopener noreferrer';
-            igLink.style.color = '#fff';
-            igLink.style.textDecoration = 'none';
-            igLink.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
-            socialLinksContainer.appendChild(igLink);
+            socialLinksContainer.appendChild(
+                buildSocialIconLink(settings.igUrl, SOCIAL_ICONS.instagram)
+            );
+        }
+        if (settings.linkedinUrl) {
+            socialLinksContainer.appendChild(
+                buildSocialIconLink(settings.linkedinUrl, SOCIAL_ICONS.linkedin)
+            );
         }
     }
 
-    // 0.6 Load Social Feeds
-    const xFeedContainer = document.getElementById('x-feed-container');
-    const igFeedContainer = document.getElementById('ig-feed-container');
-
-    if (xFeedContainer && settings.xUrl) {
-        xFeedContainer.innerHTML = `
-            <h3 style="margin-top:0; font-size:1.2rem; color:var(--accent-color); text-align:center; padding-bottom: 1rem; border-bottom: 1px solid #eee;">X (Twitter)</h3>
-            <div style="margin-top: 1rem;">
-                <a class="twitter-timeline" data-height="500" href="${escapeHtml(settings.xUrl)}">Tweets by X</a>
-            </div>
-        `;
-        // Load Twitter widget script once
-        if (!document.getElementById('twitter-wjs')) {
-            const script = document.createElement('script');
-            script.id = 'twitter-wjs';
-            script.src = 'https://platform.twitter.com/widgets.js';
-            script.async = true;
-            script.charset = 'utf-8';
-            document.body.appendChild(script);
-        }
-    } else if (xFeedContainer) {
-        xFeedContainer.style.display = 'none'; // hide if not configured
-    }
-
-    if (igFeedContainer && settings.igEmbedHtml) {
-        igFeedContainer.innerHTML = `
-            <h3 style="margin-top:0; font-size:1.2rem; color:var(--accent-color); text-align:center; padding-bottom: 1rem; border-bottom: 1px solid #eee;">Instagram</h3>
-            <div style="max-height: 500px; overflow-y: auto; overflow-x: hidden; margin-top: 1rem; width: 100%; display: flex; justify-content: center;">
-                ${settings.igEmbedHtml}
-            </div>
-        `;
-        // Re-execute scripts inside embedHtml if any (like Instagram's embed.js)
-        const scripts = igFeedContainer.getElementsByTagName('script');
-        for (let i = 0; i < scripts.length; i++) {
-            const newScript = document.createElement('script');
-            if (scripts[i].src) newScript.src = scripts[i].src;
-            if (scripts[i].text) newScript.text = scripts[i].text;
-            newScript.async = true;
-            document.body.appendChild(newScript);
-        }
-    } else if (igFeedContainer) {
-        igFeedContainer.style.display = 'none'; // hide if not configured
-    }
-
-    // Hide the whole section if both are empty
+    // 0.6 Load Social Feeds — icon only; content is revealed on click, not auto-displayed
+    const socialIconButtons = document.getElementById('social-icon-buttons');
+    const socialPanel = document.getElementById('social-panel');
     const socialFeedsSection = document.getElementById('social-feeds');
-    if (socialFeedsSection && !settings.xUrl && !settings.igEmbedHtml) {
-        socialFeedsSection.style.display = 'none';
+
+    if (socialIconButtons && socialPanel) {
+        const platforms = [
+            { key: 'x', label: 'X (Twitter)', configured: !!settings.xUrl },
+            { key: 'instagram', label: 'Instagram', configured: !!settings.igUrl },
+            { key: 'linkedin', label: 'LinkedIn', configured: !!settings.linkedinUrl },
+        ].filter(p => p.configured);
+
+        if (platforms.length === 0 && socialFeedsSection) {
+            socialFeedsSection.style.display = 'none';
+        } else {
+            let activeKey = null;
+
+            platforms.forEach(platform => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'social-icon-btn';
+                btn.setAttribute('aria-label', platform.label);
+                btn.title = platform.label;
+                btn.innerHTML = SOCIAL_ICONS[platform.key];
+
+                btn.addEventListener('click', () => {
+                    const isSame = activeKey === platform.key;
+                    socialIconButtons.querySelectorAll('.social-icon-btn').forEach(b => b.classList.remove('active'));
+                    socialPanel.classList.remove('open');
+
+                    if (isSame) {
+                        activeKey = null;
+                        socialPanel.innerHTML = '';
+                        return;
+                    }
+
+                    activeKey = platform.key;
+                    btn.classList.add('active');
+                    renderSocialPanel(platform.key, platform.label, settings, socialPanel);
+                    requestAnimationFrame(() => socialPanel.classList.add('open'));
+                });
+
+                socialIconButtons.appendChild(btn);
+            });
+        }
     }
 
     // 1. Load Public Memos
@@ -174,16 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
             memos.forEach(memo => {
                 const memoElement = document.createElement('article');
                 memoElement.className = 'memo-card';
-                // Inline styles for simplicity, but ideally we'd put this in style.css
-                memoElement.style.border = '1px solid #ddd';
-                memoElement.style.padding = '1.5rem';
-                memoElement.style.borderRadius = '8px';
-                memoElement.style.backgroundColor = '#fff';
 
                 memoElement.innerHTML = `
-                    <h3 style="margin-top: 0; color: #333;">${escapeHtml(memo.title)}</h3>
-                    <p style="color: #666; line-height: 1.5;">${escapeHtml(memo.content).replace(/\n/g, '<br>')}</p>
-                    <small style="color: #999; display: block; margin-top: 1rem;">${new Date(memo.date).toLocaleDateString('ja-JP')}</small>
+                    <h3>${escapeHtml(memo.title)}</h3>
+                    <p>${escapeHtml(memo.content).replace(/\n/g, '<br>')}</p>
+                    <small>${new Date(memo.date).toLocaleDateString('ja-JP')}</small>
                 `;
                 memoList.appendChild(memoElement);
             });
@@ -196,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const localGalleryStr = localStorage.getItem('gallery');
         const gallery = (isAdminDevice && localGalleryStr)
             ? JSON.parse(localGalleryStr)
-            : (serverData.gallery || JSON.parse(localGalleryStr || '[]'));
+            : (window.PORTFOLIO_DATA?.gallery || JSON.parse(localGalleryStr || '[]'));
         galleryGrid.innerHTML = '';
 
         if (gallery.length === 0) {
@@ -208,12 +193,11 @@ document.addEventListener('DOMContentLoaded', () => {
             gallery.forEach(item => {
                 const article = document.createElement('article');
                 article.className = 'project-card';
-                article.style.backgroundColor = 'var(--main-bg)';
 
                 article.innerHTML = `
                     <img src="${item.imageBase64}" alt="${escapeHtml(item.title)}">
-                    <h3 style="color: var(--accent-color);">${escapeHtml(item.title)}</h3>
-                    <p style="color: var(--primary-text);">${escapeHtml(item.desc)}</p>
+                    <h3>${escapeHtml(item.title)}</h3>
+                    <p>${escapeHtml(item.desc)}</p>
                 `;
                 galleryGrid.appendChild(article);
             });
@@ -261,12 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             article.className = 'memo-card note-card';
             article.style.textDecoration = 'none';
             article.style.display = 'block';
-            article.style.border = '1px solid #ddd';
-            article.style.padding = '1.5rem';
-            article.style.borderRadius = '8px';
-            article.style.backgroundColor = '#fff';
             article.style.color = 'inherit';
-            article.style.transition = 'transform 0.2s, box-shadow 0.2s';
 
             // Extract first image from description or content if available, otherwise use a placeholder or thumbnail
             let imageUrl = item.thumbnail || '';
@@ -290,23 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             article.innerHTML = `
                 ${imgHtml}
-                <h3 style="margin-top: 0; color: #333; font-size: 1.1rem; margin-bottom: 0.5rem; line-height: 1.4;">${escapeHtml(item.title)}</h3>
-                <p style="color: #666; line-height: 1.5; font-size: 0.9rem; margin-bottom: 1rem;">${escapeHtml(snippet)}</p>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; line-height: 1.4;">${escapeHtml(item.title)}</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 1rem;">${escapeHtml(snippet)}</p>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
-                    <small style="color: #999;">${dateString}</small>
-                    <span style="color: #2cb696; font-size: 0.8rem; font-weight: bold;">Noteで読む ↗</span>
+                    <small>${dateString}</small>
+                    <span style="color: var(--accent-color); font-size: 0.8rem; font-weight: bold;">Noteで読む ↗</span>
                 </div>
             `;
-
-            // Add hover effect via JS since it's inline styled for now
-            article.addEventListener('mouseenter', () => {
-                article.style.transform = 'translateY(-3px)';
-                article.style.boxShadow = '0 6px 12px rgba(0,0,0,0.1)';
-            });
-            article.addEventListener('mouseleave', () => {
-                article.style.transform = 'translateY(0)';
-                article.style.boxShadow = 'none';
-            });
 
             container.appendChild(article);
         });
@@ -384,6 +353,93 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// SVG icon marks for each SNS platform (used for icon-only display)
+const SOCIAL_ICONS = {
+    x: `<svg width="24" height="24" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/></svg>`,
+    instagram: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`,
+    linkedin: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.114 20.452H3.56V9h3.554v11.452z"/></svg>`
+};
+
+// Builds a single icon-only link (used in the footer) — the mark is the whole affordance
+function buildSocialIconLink(url, iconSvg) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.innerHTML = iconSvg;
+    return link;
+}
+
+// Renders the reveal panel for a given SNS platform. Embeds (Twitter widget, Instagram embed
+// code) are only fetched/injected here, i.e. on click — not automatically on page load.
+function renderSocialPanel(key, label, settings, panelEl) {
+    if (key === 'x') {
+        panelEl.innerHTML = `
+            <div class="social-panel-inner">
+                <h3>${escapeHtml(label)}</h3>
+                <div style="margin-top: 1rem;">
+                    <a class="twitter-timeline" data-height="500" href="${escapeHtml(settings.xUrl)}">Tweets by X</a>
+                </div>
+            </div>
+        `;
+        if (!document.getElementById('twitter-wjs')) {
+            const script = document.createElement('script');
+            script.id = 'twitter-wjs';
+            script.src = 'https://platform.twitter.com/widgets.js';
+            script.async = true;
+            script.charset = 'utf-8';
+            document.body.appendChild(script);
+        } else if (window.twttr && window.twttr.widgets) {
+            window.twttr.widgets.load(panelEl);
+        }
+        return;
+    }
+
+    if (key === 'instagram') {
+        // The embed field sometimes holds a bare profile URL instead of embed markup;
+        // only treat it as embed code when it actually contains HTML.
+        const hasEmbedMarkup = !!settings.igEmbedHtml && settings.igEmbedHtml.includes('<');
+        if (hasEmbedMarkup) {
+            panelEl.innerHTML = `
+                <div class="social-panel-inner">
+                    <h3>${escapeHtml(label)}</h3>
+                    <div style="max-height: 500px; overflow-y: auto; overflow-x: hidden; margin-top: 1rem; width: 100%; display: flex; justify-content: center;">
+                        ${settings.igEmbedHtml}
+                    </div>
+                </div>
+            `;
+            const scripts = panelEl.getElementsByTagName('script');
+            for (let i = 0; i < scripts.length; i++) {
+                const newScript = document.createElement('script');
+                if (scripts[i].src) newScript.src = scripts[i].src;
+                if (scripts[i].text) newScript.text = scripts[i].text;
+                newScript.async = true;
+                document.body.appendChild(newScript);
+            }
+        } else {
+            renderSocialLinkCard(label, settings.igUrl, panelEl);
+        }
+        return;
+    }
+
+    if (key === 'linkedin') {
+        renderSocialLinkCard(label, settings.linkedinUrl, panelEl);
+    }
+}
+
+// Fallback panel for platforms without an embeddable feed (e.g. LinkedIn) — reveals a link card
+function renderSocialLinkCard(label, url, panelEl) {
+    panelEl.innerHTML = `
+        <div class="social-panel-inner">
+            <h3>${escapeHtml(label)}</h3>
+            <div class="social-link-card">
+                <p>${escapeHtml(label)}のプロフィールを見る</p>
+                <a class="btn-visit" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}で見る ↗</a>
+            </div>
+        </div>
+    `;
+}
 
 // Helper function to escape HTML to prevent XSS
 function escapeHtml(unsafe) {
