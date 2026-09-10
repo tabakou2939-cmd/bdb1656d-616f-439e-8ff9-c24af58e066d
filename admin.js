@@ -317,10 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         memos.forEach(memo => {
             const tr = document.createElement('tr');
+            const linkHtml = memo.link
+                ? `<br><a href="${escapeHtml(memo.link)}" target="_blank" rel="noopener noreferrer" style="font-size:0.8rem;">🔗 リンク先</a>`
+                : '';
             tr.innerHTML = `
                 <td>${new Date(memo.date).toLocaleString('ja-JP')}</td>
                 <td>${escapeHtml(memo.title)}</td>
-                <td>${escapeHtml(memo.content).substring(0, 40)}${memo.content.length > 40 ? '...' : ''}</td>
+                <td>${escapeHtml(memo.content).substring(0, 40)}${memo.content.length > 40 ? '...' : ''}${linkHtml}</td>
                 <td style="text-align:center;"><button onclick="deleteMemo(${memo.id})" style="background:#dc3545; color: white; border: none; padding: 0.25rem 0.5rem; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">削除</button></td>
             `;
             memosTableBody.appendChild(tr);
@@ -332,11 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const title = document.getElementById('memo-title').value;
             const content = document.getElementById('memo-content').value;
+            const linkInput = document.getElementById('memo-link');
+            const link = linkInput ? linkInput.value.trim() : '';
 
             const newMemo = {
                 id: Date.now(),
                 title,
                 content,
+                link,
                 date: new Date().toISOString()
             };
 

@@ -166,9 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const memoElement = document.createElement('article');
                 memoElement.className = 'memo-card';
 
+                const linkButtonHtml = memo.link
+                    ? `<a class="btn-visit" href="${escapeHtml(memo.link)}" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.75rem;">続きを読む ↗</a>`
+                    : '';
+
                 memoElement.innerHTML = `
                     <h3>${escapeHtml(memo.title)}</h3>
-                    <p>${escapeHtml(memo.content).replace(/\n/g, '<br>')}</p>
+                    <p>${linkify(escapeHtml(memo.content)).replace(/\n/g, '<br>')}</p>
+                    ${linkButtonHtml}
                     <small>${new Date(memo.date).toLocaleDateString('ja-JP')}</small>
                 `;
                 memoList.appendChild(memoElement);
@@ -451,6 +456,23 @@ function escapeHtml(unsafe) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+// Turns bare URLs typed directly into memo/note text into clickable links.
+// Must run AFTER escapeHtml, since it only ever sees already-escaped text.
+function linkify(escapedText) {
+    if (!escapedText) return '';
+    return escapedText.replace(/(https?:\/\/[^\s<]+)/g, (match) => {
+        // Strip trailing punctuation that's part of the sentence, not the URL
+        let url = match;
+        let trail = '';
+        const trailChars = ['。', '、', '）', ')', '」', '』', '.', ',', '!', '?', '！', '？'];
+        while (url.length > 0 && trailChars.includes(url.slice(-1))) {
+            trail = url.slice(-1) + trail;
+            url = url.slice(0, -1);
+        }
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${trail}`;
+    });
 }
 
 // Simple helper to adjust hex color brightness
