@@ -15,18 +15,20 @@
     <!-- Open Graph Metadata -->
     <meta property="og:title" content="田端宏成（Kosei）のポートフォリオサイト">
     <meta property="og:description" content="田端宏成（Kosei）の個人サイトです。世界遺産学・ダークツーリズム・AIの学習記録を掲載しています。">
-    <meta property="og:image" content="https://via.placeholder.com/1200x630">
     <meta property="og:url" content="https://bdb1656d-616f-439e-8ff9-c24af58e066.vercel.app/">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="profile">
+    <meta property="og:site_name" content="田端宏成（Kosei）">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="author" content="田端宏成（Kosei）">
+    <meta name="theme-color" content="#241811">
 
     <!-- Canonical URL — tells search engines this is the definitive address for this page -->
     <link rel="canonical" href="https://bdb1656d-616f-439e-8ff9-c24af58e066.vercel.app/">
 
     <!-- Twitter Card Metadata -->
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="田端宏成（Kosei）のポートフォリオサイト">
     <meta name="twitter:description" content="田端宏成（Kosei）の個人サイトです。世界遺産学・ダークツーリズム・AIの学習記録を掲載しています。">
-    <meta name="twitter:image" content="https://via.placeholder.com/1200x630">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,6 +38,30 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
+
+    <!-- Structured data: tells search engines this site is about the person 田端宏成 (Kosei) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "url": "https://bdb1656d-616f-439e-8ff9-c24af58e066.vercel.app/",
+        "name": "田端宏成（Kosei）のポートフォリオサイト",
+        "inLanguage": "ja",
+        "mainEntity": {
+            "@type": "Person",
+            "name": "田端宏成",
+            "alternateName": ["Kosei", "たばた こうせい"],
+            "url": "https://bdb1656d-616f-439e-8ff9-c24af58e066.vercel.app/",
+            "description": "紛争や戦争などの人類史の悲劇（負の遺産、記憶の場、ダークツーリズム）、世界遺産学、AIについて学んでいます。",
+            "knowsAbout": ["世界遺産学", "ダークツーリズム", "負の遺産", "記憶の場", "AI"],
+            "sameAs": [
+                "https://x.com/kosei_2939",
+                "https://www.instagram.com/kose_i39/",
+                "https://note.com/kosei_2939"
+            ]
+        }
+    }
+    </script>
 </head>
 
 <body>
@@ -56,7 +82,7 @@
             <li><a href="#contact" class="nav-link">お問い合わせ</a></li>
         </ul>
         <div class="nav-admin">
-            <a href="admin.html" class="nav-admin-link">🔒 管理者画面</a>
+            <a href="admin.html" class="nav-admin-link" rel="nofollow">管理者画面</a>
         </div>
     </nav>
     <div id="nav-overlay" class="nav-overlay"></div>
@@ -64,15 +90,13 @@
     <header id="hero" style="position: relative;">
         <div class="container">
             <h1 id="profile-name">こんにちは、田端宏成（Kosei）です。</h1>
-            <p id="profile-intro" class="intro-text">
-                紛争や戦争などの人類史の悲劇（負の遺産、記憶の場、ダークツーリズム）、世界遺産学、AIについて学んでいます。<br>
-                当サイトは学びの記録を残すために作りました。
-            </p>
+            <p id="profile-intro" class="intro-text">紛争や戦争などの人類史の悲劇（負の遺産、記憶の場、ダークツーリズム）、世界遺産学、AIについて学んでいます。
+当サイトは学びの記録を残すために作りました。</p>
         </div>
     </header>
 
     <main>
-        <section id="note-posts" class="note-section" style="padding: 4rem 0;">
+        <section id="note-posts" class="note-section">
             <div class="container">
                 <h2 class="heading-with-icon">
                     <svg viewBox="0 0 500 500" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
@@ -82,17 +106,17 @@
                     Note Posts
                 </h2>
                 <div class="note-scroll-container">
-                    <div id="note-list" class="memo-grid" style="display: grid; gap: 1rem;">
+                    <div id="note-list" class="memo-grid">
                         <p>Loading Note posts...</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="social-feeds" style="padding: 4rem 0;">
+        <section id="social-feeds">
             <div class="container">
                 <h2>SNS</h2>
-                <p style="text-align:center; opacity:0.65; margin-top:-0.5rem; margin-bottom:2rem;">アイコンを押すと表示されます</p>
+                <p class="section-sub">アイコンを押すと表示されます</p>
                 <div id="social-icon-buttons" class="social-icons-bar"></div>
                 <div id="social-panel" class="social-panel"></div>
             </div>
@@ -107,10 +131,10 @@
             </div>
         </section>
 
-        <section id="memos" style="padding: 4rem 0;">
+        <section id="memos">
             <div class="container">
                 <h2>Public Memos</h2>
-                <div id="memo-list" class="memo-grid" style="display: grid; gap: 1rem; margin-top: 2rem;">
+                <div id="memo-list" class="memo-grid">
                     <p>Loading memos...</p>
                 </div>
             </div>
@@ -143,12 +167,12 @@
     </main>
 
     <footer>
-        <div id="social-links" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem;"></div>
-        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+        <div id="social-links"></div>
+        <p>&copy; 2026 田端宏成（Kosei）</p>
     </footer>
     <script src="data.js"></script>
     <script src="main.js"></script>
     <script src="nav.js"></script>
 </body>
 
-</html>
+</html>

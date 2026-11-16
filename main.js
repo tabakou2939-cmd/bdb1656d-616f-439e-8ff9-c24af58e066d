@@ -25,11 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!hasPhoto && settings.colorMainBg) {
             heroSection.style.backgroundColor = settings.colorMainBg;
         }
-        if (!hasPhoto && settings.colorPrimaryText) {
+        if (!hasPhoto && settings.colorPrimaryText && settings.colorMainBg
+            && contrastRatio(settings.colorPrimaryText, settings.colorMainBg) >= 4.5) {
             heroSection.style.color = settings.colorPrimaryText;
             // Also apply to child elements explicitly if needed, but inheriting should work
         }
-        if (settings.colorHeroText) {
+        if (settings.colorHeroText && !hasPhoto
+            && contrastRatio(settings.colorHeroText, settings.colorMainBg || '#ece1d0') >= 4.5) {
             // Override specifically for the hero text using setProperty to enforce it
             const heroName = document.getElementById('profile-name');
             const heroIntro = document.getElementById('profile-intro');
@@ -40,14 +42,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // or we can scope it. Let's keep accent global so buttons still match the theme.
     }
 
+    // The admin-chosen accent is only applied when it stays readable (≥4.5:1) on both
+    // the page and card surfaces of the active theme; otherwise the design-system accent is kept.
     if (settings.colorAccent) {
-        document.documentElement.style.setProperty('--accent-color', settings.colorAccent);
-        document.documentElement.style.setProperty('--accent-hover', adjustColorBrightness(settings.colorAccent, -20));
+        const surfaces = hasPhoto ? ['#1c140f', '#2a1e16', '#140e0a'] : ['#f6efe4', '#fffbf5', '#ece1d0'];
+        const readable = surfaces.every(bg => contrastRatio(settings.colorAccent, bg) >= 4.5);
+        if (readable) {
+            const target = hasPhoto ? document.body : document.documentElement;
+            target.style.setProperty('--accent', settings.colorAccent);
+            target.style.setProperty('--accent-strong', adjustColorBrightness(settings.colorAccent, hasPhoto ? 20 : -20));
+            target.style.setProperty('--focus', settings.colorAccent);
+        }
     }
 
     if (settings.profileName) {
         document.getElementById('profile-name').textContent = `こんにちは、${settings.profileName}です。`;
-        document.title = `${settings.profileName} - Portfolio`;
+        document.title = `${settings.profileName}のポートフォリオサイト`;
         
         const ogTitle = document.querySelector('meta[property="og:title"]');
         if (ogTitle) ogTitle.content = document.title;
@@ -167,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 memoElement.className = 'memo-card';
 
                 const linkButtonHtml = memo.link
-                    ? `<a class="btn-visit" href="${escapeHtml(memo.link)}" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.75rem;">続きを読む ↗</a>`
+                    ? `<a class="btn-visit" href="${escapeHtml(memo.link)}" target="_blank" rel="noopener noreferrer">続きを読む ↗</a>`
                     : '';
 
                 memoElement.innerHTML = `
@@ -249,9 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
             article.target = '_blank';
             article.rel = 'noopener noreferrer';
             article.className = 'memo-card note-card';
-            article.style.textDecoration = 'none';
-            article.style.display = 'block';
-            article.style.color = 'inherit';
 
             // Extract first image from description or content if available, otherwise use a placeholder or thumbnail
             let imageUrl = item.thumbnail || '';
@@ -260,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (imgMatch) imageUrl = imgMatch[1];
             }
 
-            const imgHtml = imageUrl ? `<div style="width: 100%; height: 150px; overflow: hidden; border-radius: 4px; margin-bottom: 1rem;"><img src="${imageUrl}" alt="thumbnail" style="width: 100%; height: 100%; object-fit: cover;"></div>` : '';
+            const imgHtml = imageUrl ? `<div class="note-thumb"><img src="${escapeHtml(imageUrl)}" alt="" loading="lazy"></div>` : '';
 
             // Clean up description (remove HTML tags for snippet)
             let snippet = '';
@@ -275,11 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             article.innerHTML = `
                 ${imgHtml}
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; line-height: 1.4;">${escapeHtml(item.title)}</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 1rem;">${escapeHtml(snippet)}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
-                    <small>${dateString}</small>
-                    <span style="color: var(--accent-color); font-size: 0.8rem; font-weight: bold;">Noteで読む ↗</span>
+                <h3>${escapeHtml(item.title)}</h3>
+                <p>${escapeHtml(snippet)}</p>
+                <div class="note-foot">
+                    <small>${escapeHtml(dateString)}</small>
+                    <span class="note-cta">Noteで読む ↗</span>
                 </div>
             `;
 
@@ -506,4 +513,20 @@ function adjustColorBrightness(hex, percent) {
     let b_hex = (b.toString(16).length == 1) ? '0' + b.toString(16) : b.toString(16);
 
     return '#' + r_hex + g_hex + b_hex;
+}
+
+// WCAG contrast ratio between two hex colours (#rgb or #rrggbb). Returns 1 for unparseable input.
+function contrastRatio(a, b) {
+    const lum = (hex) => {
+        let h = String(hex || '').trim().replace(/^#/, '');
+        if (h.length === 3) h = h.split('').map(c => c + c).join('');
+        if (!/^[0-9a-f]{6}$/i.test(h)) return null;
+        const ch = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+            .map(c => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+        return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+    };
+    const la = lum(a), lb = lum(b);
+    if (la === null || lb === null) return 1;
+    const [hi, lo] = la > lb ? [la, lb] : [lb, la];
+    return (hi + 0.05) / (lo + 0.05);
 }
