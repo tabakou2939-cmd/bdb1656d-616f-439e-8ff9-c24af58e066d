@@ -78,7 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settings.profileIntro) {
         document.getElementById('profile-intro').textContent = settings.profileIntro;
         
-        const cleanIntro = settings.profileIntro.replace(/\n/g, ' ').substring(0, 120);
+        // 検索結果の説明文は名前から始める（自己紹介文に名前が入っていなくても検索に拾われるように）
+        const descName = (settings.profileName || '').replace(/\s*[（(][^）)]*[）)]\s*$/, '');
+        const cleanIntro = ((descName ? `${descName}のホームページ。` : '') + settings.profileIntro.replace(/\n/g, ' ')).substring(0, 120);
         const metaDesc = document.querySelector('meta[name="description"]');
         if (metaDesc) metaDesc.content = cleanIntro;
         
@@ -125,6 +127,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const socialPanel = document.getElementById('social-panel');
     const socialFeedsSection = document.getElementById('social-feeds');
 
+    // ヒーローのボタン: X が設定されていれば「X @アカウント」で直接開く。無ければ SNS セクションへ
+    const heroXLink = document.getElementById('hero-x-link');
+    if (heroXLink && settings.xUrl) {
+        try {
+            const handle = new URL(settings.xUrl).pathname.split('/').filter(Boolean)[0];
+            if (/^[A-Za-z0-9_]{1,15}$/.test(handle || '')) {
+                heroXLink.href = `https://x.com/${handle}`;
+                heroXLink.target = '_blank';
+                heroXLink.rel = 'noopener noreferrer';
+                heroXLink.textContent = `X @${handle} ↗`;
+            }
+        } catch (e) { /* URL が不正ならそのまま SNS セクションへのリンクにする */ }
+    }
+
     if (socialIconButtons && socialPanel) {
         const platforms = [
             { key: 'x', label: 'X (Twitter)', configured: !!settings.xUrl },
@@ -134,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (platforms.length === 0 && socialFeedsSection) {
             socialFeedsSection.style.display = 'none';
+            if (heroXLink) heroXLink.remove();
         } else {
             let activeKey = null;
 
@@ -274,6 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (noteSection) {
         // Hide the section entirely if no ID is configured
         noteSection.style.display = 'none';
+        const heroNoteLink = document.getElementById('hero-note-link');
+        if (heroNoteLink) heroNoteLink.remove();
     }
 
     // Helper to render Note posts
