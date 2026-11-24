@@ -1,0 +1,45 @@
+name: Sync Note posts
+
+# 毎日 06:17（日本時間）に Note の記事一覧を取り込み、変更があれば main にコミットします。
+# コミットされると Vercel が自動で再デプロイします。
+# 手動で動かすとき: GitHub の「Actions」→「Sync Note posts」→「Run workflow」
+on:
+  schedule:
+    - cron: '17 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-note
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch Note RSS and update files
+        run: node scripts/sync-note.js
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- note-posts.json index.html && [ -z "$(git ls-files --others --exclude-standard note-posts.json)" ]; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "tabakou2939-cmd"
+          git config user.email "tabakou2939-cmd@users.noreply.github.com"
+          git add note-posts.json index.html
+          git commit -m "Note記事を自動更新"
+          git pull --rebase origin main
+          git push origin HEAD:main

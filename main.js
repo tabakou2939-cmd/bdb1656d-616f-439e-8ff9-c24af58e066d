@@ -231,20 +231,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const rss2jsonApi = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(noteRssUrl)}`;
         const fallbackApi = `https://api.allorigins.win/get?url=${encodeURIComponent(noteRssUrl)}`;
 
-        fetch(rss2jsonApi)
-            .then(res => res.json())
+        // Live fallback: rss2json first, then allorigins (used when note-posts.json is missing/stale)
+        const loadNoteFromRss = () => {
+            fetch(rss2jsonApi)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok' && data.items && data.items.length > 0) {
+                        renderNotePosts(data.items, noteList);
+                    } else {
+                        // Fallback to allorigins if rss2json fails
+                        fetchFallbackRSS(fallbackApi, noteList);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Note RSS via rss2json:', error);
+                    fetchFallbackRSS(fallbackApi, noteList);
+                });
+        };
+
+        // Preferred: note-posts.json, refreshed daily by .github/workflows/sync-note.yml.
+        // Same-origin, so no third-party service is needed and the list matches the static HTML.
+        fetch('note-posts.json')
+            .then(res => (res.ok ? res.json() : Promise.reject(new Error('note-posts.json ' + res.status))))
             .then(data => {
-                if (data.status === 'ok' && data.items && data.items.length > 0) {
+                if (data && data.user === noteUserId && Array.isArray(data.items) && data.items.length > 0) {
                     renderNotePosts(data.items, noteList);
                 } else {
-                    // Fallback to allorigins if rss2json fails
-                    fetchFallbackRSS(fallbackApi, noteList);
+                    loadNoteFromRss();
                 }
             })
-            .catch(error => {
-                console.error('Error fetching Note RSS via rss2json:', error);
-                fetchFallbackRSS(fallbackApi, noteList);
-            });
+            .catch(() => loadNoteFromRss());
     } else if (noteSection) {
         // Hide the section entirely if no ID is configured
         noteSection.style.display = 'none';

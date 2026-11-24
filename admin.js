@@ -78,17 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1.2 Export Data (Publish to GitHub)
+    // Current admin data in the same shape as data.js (shared by manual export and auto-publish)
+    function collectPublishData() {
+        return {
+            site_settings: JSON.parse(localStorage.getItem('site_settings') || '{}'),
+            gallery: JSON.parse(localStorage.getItem('gallery') || '[]'),
+            memos: JSON.parse(localStorage.getItem('memos') || '[]')
+        };
+    }
+
     const exportDataBtn = document.getElementById('export-data-btn');
     if (exportDataBtn) {
         exportDataBtn.addEventListener('click', () => {
-            const settings = JSON.parse(localStorage.getItem('site_settings') || '{}');
-            const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
-            const memos = JSON.parse(localStorage.getItem('memos') || '[]');
-            const dataToExport = {
-                site_settings: settings,
-                gallery: gallery,
-                memos: memos
-            };
+            const dataToExport = collectPublishData();
 
             const scriptContent = `window.PORTFOLIO_DATA = ${JSON.stringify(dataToExport, null, 2)};`;
             const blob = new Blob([scriptContent], { type: 'text/javascript' });
@@ -103,6 +105,89 @@ document.addEventListener('DOMContentLoaded', () => {
             URL.revokeObjectURL(url);
 
             alert('data.js のダウンロードが完了しました。このファイルを GitHub にアップロード（コミット）して上書きしてください！');
+        });
+    }
+
+    // 1.3 One-click publish: POST the data to /api/publish (api/publish.js commits data.js to GitHub)
+    const publishBtn = document.getElementById('publish-btn');
+    const publishStatus = document.getElementById('publish-status');
+
+    function showPublishStatus(kind, text) {
+        if (!publishStatus) return;
+        const palette = {
+            info: ['#fff8e1', '#5d4037'],
+            ok: ['#e8f5e9', '#155724'],
+            error: ['#fdecea', '#8a1c14']
+        }[kind];
+        publishStatus.textContent = text;
+        publishStatus.style.backgroundColor = palette[0];
+        publishStatus.style.color = palette[1];
+        publishStatus.classList.remove('hidden');
+    }
+
+    function readPublishPassword() {
+        try { return sessionStorage.getItem('publish_pw') || ''; } catch (e) { return ''; }
+    }
+    function rememberPublishPassword(pw) {
+        try { if (pw) sessionStorage.setItem('publish_pw', pw); else sessionStorage.removeItem('publish_pw'); } catch (e) { /* ignore */ }
+    }
+
+    const PUBLISH_ERRORS = {
+        401: '公開用パスワードが違います。',
+        413: 'データが大きすぎて送れません（約4MBまで）。背景画像やギャラリー画像を小さくするか、「data.js をダウンロード（手動）」を使ってください。',
+        404: '公開機能が見つかりません。Vercel 上の公開サイトの管理画面から実行してください（手元の確認用サーバーでは使えません）。',
+        405: '公開機能が見つかりません。Vercel 上の公開サイトの管理画面から実行してください（手元の確認用サーバーでは使えません）。',
+        403: 'このページからは公開できません。公開サイトのURLで管理画面を開いてください。'
+    };
+    const PUBLISH_ERROR_CODES = {
+        not_configured: 'Vercel の環境変数（ADMIN_PASSWORD と GITHUB_TOKEN）がまだ設定されていません。README.md の手順を確認してください。',
+        weak_password: 'Vercel に設定した ADMIN_PASSWORD が短すぎます（12文字以上にしてください）。',
+        github_permission: 'GitHub への保存権限がありません。GITHUB_TOKEN の権限と有効期限を確認してください。',
+        github_error: 'GitHub への保存に失敗しました。少し待ってからもう一度お試しください。',
+        github_unreachable: 'GitHub に接続できませんでした。少し待ってからもう一度お試しください。'
+    };
+
+    if (publishBtn) {
+        publishBtn.addEventListener('click', async () => {
+            let password = readPublishPassword();
+            if (!password) {
+                password = window.prompt('公開用パスワードを入力してください（Vercel の ADMIN_PASSWORD に設定したもの）') || '';
+                if (!password) return;
+            }
+            if (!window.confirm('現在の内容を公開サイトに反映します。よろしいですか？')) return;
+
+            const body = JSON.stringify({ password, data: collectPublishData() });
+            if (body.length > 4000000) {
+                showPublishStatus('error', PUBLISH_ERRORS[413]);
+                return;
+            }
+
+            publishBtn.disabled = true;
+            showPublishStatus('info', '公開しています…');
+            try {
+                const res = await fetch('/api/publish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body
+                });
+                let result = {};
+                try { result = await res.json(); } catch (e) { /* not JSON */ }
+
+                if (res.ok && result.ok) {
+                    rememberPublishPassword(password);
+                    showPublishStatus('ok', result.unchanged
+                        ? '公開サイトはすでに最新の内容です。'
+                        : '公開しました。1〜2分で公開サイトに反映されます。');
+                } else {
+                    if (res.status === 401) rememberPublishPassword('');
+                    showPublishStatus('error', PUBLISH_ERROR_CODES[result.error] || PUBLISH_ERRORS[res.status]
+                        || `公開に失敗しました（コード ${res.status}）。「data.js をダウンロード（手動）」をお使いください。`);
+                }
+            } catch (err) {
+                showPublishStatus('error', '通信に失敗しました。ネットワークを確認するか、「data.js をダウンロード（手動）」をお使いください。');
+            } finally {
+                publishBtn.disabled = false;
+            }
         });
     }
 

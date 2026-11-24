@@ -191,20 +191,22 @@
             <div class="admin-toolbar">
                 <h2>ダッシュボード</h2>
                 <div class="admin-toolbar-actions">
-                    <button id="export-data-btn" style="background-color: #28a745;">⬇️ 公開用データをダウンロード
-                        (data.js)</button>
+                    <button id="publish-btn">🚀 公開する</button>
+                    <button id="export-data-btn" style="background-color: #6c757d;">⬇️ data.js をダウンロード（手動）</button>
                     <a href="/" target="_blank">公開サイトを見る ↗</a>
                     <button id="logout-btn" style="background-color: #6c757d;">ログアウト</button>
                 </div>
             </div>
+            <p id="publish-status" class="hidden" role="status" aria-live="polite"
+                style="margin: 0 0 1.5rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem;"></p>
 
             <div
                 style="background-color: #e8f5e9; border-left: 4px solid #28a745; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
                 <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #155724;">✅ 変更を世界に公開（GitHubへ反映）するには？</h4>
                 <p style="margin: 0; font-size: 0.9rem; color: #155724;">
-                    管理画面での変更は、今お使いのパソコンのブラウザの中に一時保存（LocalStorage）されています。<br>
-                    <strong>世界中から見えるようにするには：</strong>上の緑色のボタンから <code>data.js</code> をダウンロードし、GitHub上にある既存の
-                    <code>data.js</code> に上書きアップロード（コミット）してください。
+                    管理画面での変更は、今お使いのブラウザの中に一時保存（LocalStorage）されています。<br>
+                    <strong>世界中から見えるようにするには：</strong>上の「🚀 公開する」を押してください。GitHub に自動で保存され、1〜2分で公開サイトに反映されます。<br>
+                    うまくいかないときは「data.js をダウンロード（手動）」で保存し、GitHub 上の既存の <code>data.js</code> に上書きアップロード（コミット）してください。
                 </p>
             </div>
 
