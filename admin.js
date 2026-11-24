@@ -140,9 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
         403: 'このページからは公開できません。公開サイトのURLで管理画面を開いてください。'
     };
     const PUBLISH_ERROR_CODES = {
-        not_configured: 'Vercel の環境変数（ADMIN_PASSWORD と GITHUB_TOKEN）がまだ設定されていません。README.md の手順を確認してください。',
         weak_password: 'Vercel に設定した ADMIN_PASSWORD が短すぎます（12文字以上にしてください）。',
-        github_permission: 'GitHub への保存権限がありません。GITHUB_TOKEN の権限と有効期限を確認してください。',
+        not_configured: 'Vercel の環境変数がまだ設定されていません（GITHUB_APP_ID・GITHUB_APP_PRIVATE_KEY・ADMIN_PASSWORD）。README.md の手順を確認してください。',
+        bad_app_key: 'GITHUB_APP_PRIVATE_KEY を読み取れません。.pem の中身を、BEGIN と END の行も含めて丸ごと貼り付けてください。',
+        github_app_not_installed: 'GitHub App がこのリポジトリにインストールされていません。README.md の手順3を確認してください。',
+        github_permission: 'GitHub への保存権限がありません。App ID・秘密鍵・App の権限（Contents: Read and write）を確認してください。',
         github_error: 'GitHub への保存に失敗しました。少し待ってからもう一度お試しください。',
         github_unreachable: 'GitHub に接続できませんでした。少し待ってからもう一度お試しください。'
     };

@@ -7,10 +7,18 @@
  * コミットされると Vercel が自動で再デプロイし、公開サイトに反映されます。
  *
  * Vercel の環境変数（Settings → Environment Variables）:
- *   ADMIN_PASSWORD  公開用パスワード（12文字以上。admin.js に書かれているログイン用とは別のもの）
- *   GITHUB_TOKEN    このリポジトリだけに権限を絞った Fine-grained token（Contents: Read and write）
- *   GITHUB_REPO     省略可。"owner/name"（既定: このリポジトリ）
- *   GITHUB_BRANCH   省略可。コミット先ブランチ（既定: main）
+ *   ADMIN_PASSWORD           公開用パスワード（12文字以上。admin.js に書かれているログイン用とは別のもの）
+ *
+ *   GitHub への認証（どちらか一方。両方あれば GitHub App を使う）:
+ *   GITHUB_APP_ID            GitHub App の App ID（推奨。期限切れの心配がない）
+ *   GITHUB_APP_PRIVATE_KEY   GitHub App の秘密鍵（.pem の中身。改行は \n でも可）
+ *   GITHUB_TOKEN             Fine-grained token（Contents: Read and write。期限があるので定期的な作り直しが必要）
+ *
+ *   GITHUB_REPO              省略可。"owner/name"（既定: このリポジトリ）
+ *   GITHUB_BRANCH            省略可。コミット先ブランチ（既定: main）
+ *
+ * GitHub App の場合、公開のたびに「このリポジトリの Contents だけ書ける・1時間で失効する」
+ * トークンをその場で発行して使います。秘密鍵そのものに期限はありません。
  */
 
 const crypto = require('crypto');
@@ -55,11 +63,60 @@ function buildDataJs(data) {
     return `window.PORTFOLIO_DATA = ${JSON.stringify(body, null, 2)};`;
 }
 
-async function github(path, { method = 'GET', body } = {}) {
+// ---- GitHub App 認証 ---------------------------------------------------------
+
+const b64url = (input) => Buffer.from(input).toString('base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+function appPrivateKey() {
+    // Vercel の入力欄で改行が "\n" の文字として保存されても動くようにする
+    return String(process.env.GITHUB_APP_PRIVATE_KEY || '').replace(/\\n/g, '\n').trim();
+}
+
+function useGithubApp() {
+    return !!(process.env.GITHUB_APP_ID && process.env.GITHUB_APP_PRIVATE_KEY);
+}
+
+// GitHub App として名乗るための短命な署名付きトークン（JWT, 10分以内）
+function createAppJwt() {
+    const now = Math.floor(Date.now() / 1000);
+    const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+    const payload = b64url(JSON.stringify({ iat: now - 60, exp: now + 9 * 60, iss: String(process.env.GITHUB_APP_ID) }));
+    const signature = crypto.createSign('RSA-SHA256').update(`${header}.${payload}`).sign(appPrivateKey());
+    return `${header}.${payload}.${b64url(signature)}`;
+}
+
+class PublishError extends Error {
+    constructor(status, code, detail) { super(code); this.status = status; this.code = code; this.detail = detail; }
+}
+
+// 1時間で失効する、このリポジトリの Contents だけを書けるトークンを発行する
+async function getInstallationToken() {
+    let jwt;
+    try {
+        jwt = createAppJwt();
+    } catch (e) {
+        throw new PublishError(500, 'bad_app_key', e.message);
+    }
+
+    const inst = await github(`/repos/${REPO}/installation`, { token: jwt });
+    if (inst.status === 404) throw new PublishError(502, 'github_app_not_installed', inst.status);
+    if (inst.status !== 200 || !inst.json || !inst.json.id) throw new PublishError(502, 'github_permission', inst.status);
+
+    const issued = await github(`/app/installations/${inst.json.id}/access_tokens`, {
+        method: 'POST',
+        token: jwt,
+        body: { repositories: [REPO.split('/')[1]], permissions: { contents: 'write' } }
+    });
+    if (issued.status !== 201 || !issued.json || !issued.json.token) throw new PublishError(502, 'github_permission', issued.status);
+    return issued.json.token;
+}
+
+async function github(path, { method = 'GET', body, token } = {}) {
     const res = await fetch(`https://api.github.com${path}`, {
         method,
         headers: {
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            Authorization: `Bearer ${token || process.env.GITHUB_TOKEN}`,
             Accept: 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28',
             'User-Agent': 'portfolio-publish',
@@ -72,12 +129,12 @@ async function github(path, { method = 'GET', body } = {}) {
     return { status: res.status, json };
 }
 
-async function commitDataJs(content) {
+async function commitDataJs(content, token) {
     const contentsPath = `/repos/${REPO}/contents/${FILE_PATH}`;
 
     // sha が古いと GitHub が 409/422 を返すので、1回だけ取り直して再試行する
     for (let attempt = 0; attempt < 2; attempt++) {
-        const current = await github(`${contentsPath}?ref=${encodeURIComponent(BRANCH)}`);
+        const current = await github(`${contentsPath}?ref=${encodeURIComponent(BRANCH)}`, { token });
         if (current.status !== 200 && current.status !== 404) return current;
 
         if (current.status === 200 && typeof current.json.content === 'string' && current.json.content) {
@@ -87,6 +144,7 @@ async function commitDataJs(content) {
 
         const put = await github(contentsPath, {
             method: 'PUT',
+            token,
             body: {
                 message: '管理画面からコンテンツを更新',
                 content: Buffer.from(content, 'utf8').toString('base64'),
@@ -120,7 +178,7 @@ async function handler(req, res) {
     }
 
     const adminPassword = process.env.ADMIN_PASSWORD || '';
-    if (!process.env.GITHUB_TOKEN || !adminPassword) {
+    if (!(useGithubApp() || process.env.GITHUB_TOKEN) || !adminPassword) {
         return res.status(500).json({ error: 'not_configured' });
     }
     if (adminPassword.length < MIN_PASSWORD_LENGTH) {
@@ -151,8 +209,13 @@ async function handler(req, res) {
 
     let result;
     try {
-        result = await commitDataJs(content);
+        const token = useGithubApp() ? await getInstallationToken() : process.env.GITHUB_TOKEN;
+        result = await commitDataJs(content, token);
     } catch (err) {
+        if (err instanceof PublishError) {
+            console.error('publish: GitHub App auth failed:', err.code, err.detail);
+            return res.status(err.status).json({ error: err.code });
+        }
         console.error('publish: GitHub request failed', err);
         return res.status(502).json({ error: 'github_unreachable' });
     }
