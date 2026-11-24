@@ -56,7 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (settings.profileName) {
-        document.getElementById('profile-name').textContent = `こんにちは、${settings.profileName}です。`;
+        // 見出しは「◯◯のホームページです。」。名前の後ろの（Kosei）などの補足は見出しからは外す。
+        // 折り返しは「名前の」と「ホームページです。」の間だけにして、名前の途中で改行されないようにする。
+        const heroTitle = document.getElementById('profile-name');
+        const displayName = settings.profileName.replace(/\s*[（(][^）)]*[）)]\s*$/, '') || settings.profileName;
+        heroTitle.textContent = '';
+        [`${displayName}の`, 'ホームページです。'].forEach(text => {
+            const part = document.createElement('span');
+            part.className = 'title-part';
+            part.textContent = text;
+            heroTitle.appendChild(part);
+        });
         document.title = `${settings.profileName}のポートフォリオサイト`;
         
         const ogTitle = document.querySelector('meta[property="og:title"]');

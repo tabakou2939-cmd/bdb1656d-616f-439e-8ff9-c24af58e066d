@@ -475,6 +475,11 @@ body.has-photo .section-sub {
     margin-bottom: var(--space-5);
 }
 
+/* 見出しの折り返しは、このまとまりの間だけで行う（名前の途中で改行しない） */
+.title-part {
+    display: inline-block;
+}
+
 #hero .intro-text {
     font-size: 18px;
     line-height: 1.9;
